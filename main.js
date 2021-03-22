@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, ipcMain} = require('electron')
 const path = require('path')
 
 function createWindow () {
@@ -8,7 +8,10 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+
+      nodeIntegration: true,
+      contextIsolation: false,
     }
   })
 
@@ -16,7 +19,12 @@ function createWindow () {
   mainWindow.loadFile('index.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+
+  // This sends a ping event to renderer.js every second
+  setInterval(function() {
+    mainWindow.webContents.send('ping', 'data');
+  }, 1000);
 }
 
 // This method will be called when Electron has finished
